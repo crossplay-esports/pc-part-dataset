@@ -3,8 +3,8 @@
 	"version": "0.1.0",
 	"private": true,
 	"scripts": {
-		"start": "ts-node src/scraper.ts",
-		"dev": "ts-node -T src/scraper.ts",
+		"start-scrape": "ts-node src/scraper.ts",
+		"dev": "ts-node -T src/index.ts",
 		"count": "ts-node src/counter.ts",
 		"output": "ts-node src/output.ts",
 		"zip": "cd data; for dir in json jsonl csv; do zip -r \"${dir}.zip\" \"$dir\" -x \"*.DS_Store\"; done"
@@ -14,6 +14,9 @@
 		"typescript": "^5.1.6"
 	},
 	"dependencies": {
+		"dotenv": "^16.4.5",
+		"mongoose": "^8.7.0",
+		"path": "^0.12.7",
 		"puppeteer": "^20.7.4",
 		"puppeteer-cluster": "^0.23.0",
 		"puppeteer-extra": "^3.3.6",
