@@ -4,6 +4,9 @@ import type { Page } from 'puppeteer'
 import { Cluster } from 'puppeteer-cluster'
 import puppeteer from 'puppeteer-extra'
 import StealthPlugin from 'puppeteer-extra-plugin-stealth'
+import { connect } from 'puppeteer-real-browser';
+
+
 import untypedMap from './serialization-map.json'
 import {
 	customSerializers,
@@ -46,6 +49,7 @@ puppeteer.use(StealthPlugin())
 
 const map = untypedMap as unknown as SerializationMap
 
+//@ts-ignore
 async function scrapeInParallel(endpoints: PartType[]) {
 	await mkdir(join(STAGING_DIRECTORY, 'json'), { recursive: true })
 
@@ -55,7 +59,7 @@ async function scrapeInParallel(endpoints: PartType[]) {
 		timeout: 1000 * 60 * 20, // 20 minutes
 		puppeteer,
 		puppeteerOptions: {
-			headless: 'new',
+			headless: false,
 		},
 	})
 
@@ -81,16 +85,41 @@ async function scrapeInParallel(endpoints: PartType[]) {
 			JSON.stringify(allParts)
 		)
 	})
-
+	//@ts-ignore
 	cluster.queue('https://pcpartpicker.com', async ({ page, data }) => {
-		const res = await page.goto(data)
+		// @ts-ignore
+		const { browser, page:page1 } = await connect({
+			headless: false,
+	
+			args: [],
+	
+			customConfig: {},
+	
+			turnstile: true,
+	
+			connectOption: {},
+	
+			disableXvfb: false,
+			ignoreAllFlags: false
+			// proxy:{
+			//     host:'<proxy-host>',
+			//     port:'<proxy-port>',
+			//     username:'<proxy-username>',
+			//     password:'<proxy-password>'
+			// }
+		})
+
+		const res = await page1.goto(data)
+		await new Promise(r => setTimeout(r, 30000));
+		await page1.screenshot({ path: `${new Date().getTime()}.png`, fullPage: true })
 
 		try {
-			await page.waitForSelector('nav', { timeout: 5000 })
-		} catch {
+			await page1.waitForSelector('nav', { timeout: 15000 })
+		} catch (e) {
+			console.log(e);
+			console.log(res)
 			console.error(
-				`Initial fetch test failed (HTTP ${
-					res?.status() ?? '?'
+				`Initial fetch test failed (HTTP ${res?.status() ?? '?'
 				}). Try running with \`{ headless: false }\` to see what the problem is.`
 			)
 			return
@@ -200,8 +229,47 @@ async function* scrape(endpoint: PartType, page: Page): AsyncGenerator<Part[]> {
 }
 
 const inputEndpoints = process.argv.slice(2)
+//@ts-ignore
 const endpointsToScrape = inputEndpoints.length
 	? (inputEndpoints as PartType[])
-	: ALL_ENDPOINTS
+	: ALL_ENDPOINTS;
 
 scrapeInParallel(endpointsToScrape)
+// ( async () => {
+// try {
+// // @ts-ignore
+// 	const { browser, page } = await connect({
+// 		headless: false,
+
+//         args: [],
+
+//         customConfig: {},
+
+//         turnstile: true,
+
+//         connectOption: {},
+
+//         disableXvfb: false,
+//         ignoreAllFlags: false
+//         // proxy:{
+//         //     host:'<proxy-host>',
+//         //     port:'<proxy-port>',
+//         //     username:'<proxy-username>',
+//         //     password:'<proxy-password>'
+//         // }
+// 	})
+// 	// await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.5643.204 Safari/537.36')
+// 	await page.goto('https://pcpartpicker.com');
+
+// 	await new Promise(r => setTimeout(r, 30000));
+// 	console.log('set screenshot');
+// 	await page.screenshot({
+// 		path: `${new Date().getTime()}.png`,
+// 		fullPage: true
+// 	})
+
+// 	process.exit(-1);
+// } catch (e) {
+// 	console.log(e)
+// }
+// })()
