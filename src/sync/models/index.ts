@@ -1,14 +1,18 @@
+import Case from "./case";
+import caseAccessory from "./case-accessory";
+import caseFan from "./case-fan";
 import Cpu from "./cpu";
+import Cpucooler from "./cpu-cooler";
 import Videocard from "./video-card";
 
 const ALL_MODELS: Record<string, any> = {
     'cpu': Cpu,
-	// 'cpu-cooler',
+	'cpu-cooler': Cpucooler,
 	// 'motherboard',
 	// 'memory',
 	// 'internal-hard-drive',
 	'video-card': Videocard,
-	// 'case',
+	'case': Case,
 	// 'power-supply',
 	// 'os',
 	// 'monitor',
@@ -20,8 +24,8 @@ const ALL_MODELS: Record<string, any> = {
 	// 'mouse',
 	// 'speakers',
 	// 'webcam',
-	// 'case-accessory',
-	// 'case-fan',
+	'case-accessory': caseAccessory,
+	'case-fan': caseFan,
 	// 'fan-controller',
 	// 'thermal-paste',
 	// 'external-hard-drive',

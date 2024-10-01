@@ -37,3 +37,22 @@ export const loadJSON = (fileName: string) => {
     const obj = JSON.parse(fs.readFileSync(fpath, 'utf-8'));
     return obj
 }
+
+export const parseAttributeToDescription = (val: Number | Array<Number> | null | undefined, unit?: String, prefix?: String): string => {
+    let ret = ''
+
+    if (!val) { return ''; }
+
+    if (Array.isArray(val)) {
+        ret = `${val[val.length - 1]} (max)`
+    } else {
+        ret = `${val}`
+    }
+
+    ret = prefix ? ` ${prefix} : ${ret}` : ` ${ret}`;
+
+    if(unit) {
+        ret =`${ret} ${unit}` 
+    }
+    return ret;
+}
